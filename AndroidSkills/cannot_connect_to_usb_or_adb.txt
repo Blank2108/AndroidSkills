@@ -1,0 +1,39 @@
+提示??????????? no permission
+xxnan@xxnan-pt:~$ lsusb
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 002: ID 8087:0020 Intel Corp. Integrated Rate Matching Hub
+Bus 002 Device 002: ID 8087:0020 Intel Corp. Integrated Rate Matching Hub
+Bus 001 Device 003: ID 0461:4d80 Primax Electronics, Ltd 
+Bus 001 Device 004: ID 1c7a:0801 LighTuning Technology Inc. Fingerprint Reader
+Bus 002 Device 003: ID 5986:0190 Acer, Inc 
+Bus 001 Device 019: ID 0bb4:0c02 High Tech Computer Corp. Dream / ADP1 / G1 / Magic / Tattoo (Debug)
+红色的就是我们插入usb的ID号。
+那么我们进入到cd /etc/udev/rules.d/下，新建一个51-Android.rules文件（sudo  vim  51-android.rules），在这个文件中写上：
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0bb4", ATTRS{idProduct}=="0c02",MODE="0666"
+保存，再为51-android.rules加上权限（sudo chmod a+x 51-android.rules）.
+重启udev：$sudo service udev restart
+重新启动adb server: 
+(很重要)拔掉usb
+ 重新连上再执行：
+ adb kill-server
+ adb devices
+ adb root (这一步很重要 
+ 
+通过以上办法还是无法识别android设备的，则可能你的android的VID未能加入adb中，你需要手动添加。
+添加的文件位置与你第一次启动adb server有关，如你在root上启动adb server，则其位置在
+/root/.android/adb_usb.ini，否则其位置在$HOME/.android/adb_usb.ini下，
+如果$HOME为空，则在/tmp/.android/adb_usb.ini下。未有文件或目录的请手动添加。以下是一份adb_usb.ini的示例：
+#for OKWAP C900
+0x14b4
+#for K-Touch W606
+0x0525
+#for lenovo speic
+0x2006
+其中#开头表注释，其它则表示android的VID，每个VID需要单独一行。
+获取VID的方法：插上设备前运行lsusb，插上设备后，再次运行lsusb，多出的那个就是你的设备，而VID就在其中如：
+Bus 001 Device 034: ID 2006:5010
+其中的2006即为其VID。
+在adb_usb.ini中添加好后，杀掉adb server，然后启动adb server，（参考a中提到的方法）。
+
+拔掉usb重新插上就可以了)

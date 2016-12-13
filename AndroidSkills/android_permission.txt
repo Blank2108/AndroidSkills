@@ -1,0 +1,6 @@
+adb列出危险权限组
+adb shell pm list permissions -d -g
+adb列出所有权限组
+adb shell pm list permissions -g
+adb授予/回收权限
+adb shell pm [grant|revoke] permission
